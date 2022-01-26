@@ -1,7 +1,8 @@
-import { Card, CardActions, CardContent, Skeleton, Typography } from '@mui/material';
+import { Card, CardActions, CardContent, Typography } from '@mui/material';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { HashRouter, Link, Route, Routes } from 'react-router-dom';
+import GameListLoadingSkeleton from './components/GameListLoadingSkeleton';
 import { Game } from './models';
 import Simulate from './simulate';
 
@@ -33,6 +34,7 @@ export default function App() {
           });
         }
         setGames(g);
+
         getAndAssignGameOrders(g);
       })
       .finally(() => {
