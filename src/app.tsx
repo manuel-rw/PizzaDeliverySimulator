@@ -45,64 +45,7 @@ export default function App() {
   return (
     <>
       <div className="games-list-wrapper">
-        {isLoading && (
-          <>
-            <div>
-              <Skeleton animation="wave" width="30%" height={20} />
-              <Skeleton animation="wave" width="80%" height={40} />
-              <Skeleton animation="wave" width="65%" height={45} />
-              <Skeleton animation="wave" width={304} height={148} />
-            </div>
-            <div>
-              <Skeleton animation="wave" width="30%" height={20} />
-              <Skeleton animation="wave" width="80%" height={40} />
-              <Skeleton animation="wave" width="65%" height={45} />
-              <Skeleton animation="wave" width={304} height={148} />
-            </div>
-            <div>
-              <Skeleton animation="wave" width="30%" height={20} />
-              <Skeleton animation="wave" width="80%" height={40} />
-              <Skeleton animation="wave" width="65%" height={45} />
-              <Skeleton animation="wave" width={304} height={148} />
-            </div>
-            <div>
-              <Skeleton animation="wave" width="30%" height={20} />
-              <Skeleton animation="wave" width="80%" height={40} />
-              <Skeleton animation="wave" width="65%" height={45} />
-              <Skeleton animation="wave" width={304} height={148} />
-            </div>
-            <div>
-              <Skeleton animation="wave" width="30%" height={20} />
-              <Skeleton animation="wave" width="80%" height={40} />
-              <Skeleton animation="wave" width="65%" height={45} />
-              <Skeleton animation="wave" width={304} height={148} />
-            </div>
-            <div>
-              <Skeleton animation="wave" width="30%" height={20} />
-              <Skeleton animation="wave" width="80%" height={40} />
-              <Skeleton animation="wave" width="65%" height={45} />
-              <Skeleton animation="wave" width={304} height={148} />
-            </div>
-            <div>
-              <Skeleton animation="wave" width="30%" height={20} />
-              <Skeleton animation="wave" width="80%" height={40} />
-              <Skeleton animation="wave" width="65%" height={45} />
-              <Skeleton animation="wave" width={304} height={148} />
-            </div>
-            <div>
-              <Skeleton animation="wave" width="30%" height={20} />
-              <Skeleton animation="wave" width="80%" height={40} />
-              <Skeleton animation="wave" width="65%" height={45} />
-              <Skeleton animation="wave" width={304} height={148} />
-            </div>
-            <div>
-              <Skeleton animation="wave" width="30%" height={20} />
-              <Skeleton animation="wave" width="80%" height={40} />
-              <Skeleton animation="wave" width="65%" height={45} />
-              <Skeleton animation="wave" width={304} height={148} />
-            </div>
-          </>
-        )}
+        {isLoading && <GameListLoadingSkeleton />}
         {!isLoading &&
           games.map((game) => (
             <Card key={game.id} elevation={3}>
