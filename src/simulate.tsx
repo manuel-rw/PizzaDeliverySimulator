@@ -17,6 +17,8 @@ interface Point {
   x: number;
   y: number;
 }
+import InformationPizzeria from './components/InformationPizzeria';
+import InformationDeliveries from './components/InformationDeliveries';
 
 export default function Simulate() {
   const location = useLocation().state;
@@ -28,7 +30,7 @@ export default function Simulate() {
   // get current BrowserWindow
   const win = window as any;
   // resize the window to the size of the game field
-  win.resizeTo(game.field.width + 300, game.field.height + 150);
+  win.resizeTo(game.field.width + 600, game.field.height + 150);
 
   React.useEffect(() => {
     game.orders.forEach((order) => {
@@ -36,6 +38,7 @@ export default function Simulate() {
     });
 
     drawStore(game.store.x, game.store.y);
+
     return () => {
       isMounted.current = false;
     };
@@ -80,26 +83,8 @@ export default function Simulate() {
           </div>
         </div>
         <div className="game-info-wrapper">
-          <h3>Information Pizzeria</h3>
-          <small>Max order capacity pro Client: {game.maxPizza}</small>
-          <small> Scooter transport capacity: {game.maxScooter}</small>
-          <small> Amount of Orders: {game.orders.length}</small>
-          <h3>Information Deliveries</h3>
-          {game.orders.map((order, index) => (
-            <div key={order.id}>
-              <small>
-                <strong>Delivery {index + 1}</strong>
-              </small>{' '}
-              <br />
-              <small>
-                Amount of Pizza orders: <strong>{order.amountOfOrders}</strong>
-              </small>{' '}
-              <br />
-              <small>
-                Type of ordered Pizza: <strong>{order.type}</strong>
-              </small>
-            </div>
-          ))}
+          <InformationPizzeria {...game} />
+          <InformationDeliveries {...game} />
         </div>
       </div>
     </>
