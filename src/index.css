@@ -27,10 +27,17 @@ body {
   display: flex;
   flex-direction: column;
   padding: 0 10px;
+  max-height: 820px;
+  overflow: auto;
+  margin-left: auto;
 }
 
 .game-info-wrapper p {
   margin: 0;
+}
+
+.game-layers {
+  position: relative;
 }
 
 .button-link-primary {
