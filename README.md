@@ -15,3 +15,8 @@ And start the project by calling
 npm start
 ```
 To Build this project follow official Electron Forge Documentation [Link](https://www.electronforge.io/config/makers)
+
+
+| Overview | Details |
+|--------------|-----------|
+| ![image](https://user-images.githubusercontent.com/17837758/151455400-2c25ca4f-99db-4afe-8afc-2bb15783c641.png) | ![image](https://user-images.githubusercontent.com/17837758/151455436-1a333488-7088-4ea8-8464-538076c3e99f.png) |
