@@ -1,43 +1,80 @@
 import React from 'react';
-import { Point } from '../models';
+import { IGame, IPoint } from '../../models';
+import { defaultCanvasProperties, Layers } from './Layers';
 
-const OFFSET = 5;
+export function DeliveryAnimation(game: IGame) {
+  const deliveryAnimationRef = React.useRef(null);
+  const animateDelivery = React.useCallback(() => {
+    const canvas = deliveryAnimationRef.current;
+    const deliveryAnimationCtx = canvas.getContext('2d');
 
-function _drawStore(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  // draw store
-  ctx.beginPath();
+    game.orders.forEach((order) => {
+      forwardsAnimation(deliveryAnimationCtx, game.store, order.position);
+    });
+  }, [game]);
 
-  ctx.fillStyle = '#ff0000';
-  ctx.arc(x, y, 10, 0, 2 * Math.PI);
-  ctx.fill();
+  React.useEffect(() => {
+    const canvas = deliveryAnimationRef.current;
+    defaultCanvasProperties(canvas, game.field.width, game.field.height, Layers.DELIVERY_ANIMATION);
+  }, []);
+
+  return { deliveryAnimationRef, animateDelivery };
 }
 
-function _drawDeliveryPoint(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  // draw delivery point
-  ctx.beginPath();
+function forwardsAnimation(ctx: CanvasRenderingContext2D, store: IPoint, deliveryPoint: IPoint) {
+  const xStepValue = (deliveryPoint.x - store.x) / 80;
+  const yStepValue = (deliveryPoint.y - store.y) / 80;
 
-  ctx.fillStyle = '#00ff00';
-  ctx.arc(x, y, 10, 0, 2 * Math.PI);
-  ctx.fill();
+  let xDelta = store.x;
+  let yDelta = store.y;
+
+  const interval = setInterval(() => {
+    if (deliveryPoint.x > store.x) {
+      if (xDelta <= deliveryPoint.x) {
+        xStepValue > 0 ? (xDelta += xStepValue) : (xDelta -= Math.abs(xStepValue));
+      }
+    } else {
+      if (xDelta >= deliveryPoint.x) {
+        xStepValue > 0 ? (xDelta += xStepValue) : (xDelta -= Math.abs(xStepValue));
+      }
+    }
+    if (deliveryPoint.y > store.y) {
+      if (yDelta <= deliveryPoint.y) {
+        yStepValue > 0 ? (yDelta += yStepValue) : (yDelta -= Math.abs(yStepValue));
+      }
+    } else {
+      if (yDelta >= deliveryPoint.y) {
+        yStepValue > 0 ? (yDelta += yStepValue) : (yDelta -= Math.abs(yStepValue));
+      }
+    }
+
+    if (deliveryPoint.x > store.x && deliveryPoint.y > store.y) {
+      if (xDelta >= deliveryPoint.x && yDelta >= deliveryPoint.y) {
+        backwardsAnimation(ctx, store, deliveryPoint);
+        clearInterval(interval);
+      }
+    } else if (deliveryPoint.x > store.x && deliveryPoint.y < store.y) {
+      if (xDelta >= deliveryPoint.x && yDelta <= deliveryPoint.y) {
+        backwardsAnimation(ctx, store, deliveryPoint);
+        clearInterval(interval);
+      }
+    } else if (deliveryPoint.x < store.x && deliveryPoint.y > store.y) {
+      if (xDelta <= deliveryPoint.x && yDelta >= deliveryPoint.y) {
+        backwardsAnimation(ctx, store, deliveryPoint);
+        clearInterval(interval);
+      }
+    } else if (deliveryPoint.x < store.x && deliveryPoint.y < store.y) {
+      if (xDelta <= deliveryPoint.x && yDelta <= deliveryPoint.y) {
+        backwardsAnimation(ctx, store, deliveryPoint);
+        clearInterval(interval);
+      }
+    }
+
+    _moveScooter(ctx, xDelta, yDelta);
+  }, 100);
 }
 
-function _moveScooter(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  ctx.beginPath();
-
-  ctx.fillStyle = '#0000ff';
-  ctx.arc(x, y, 4, 0, 2 * Math.PI);
-  ctx.fill();
-}
-
-function _moveScooterBackwards(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  ctx.beginPath();
-
-  ctx.fillStyle = '#222';
-  ctx.arc(x, y, 6, 0, 2 * Math.PI);
-  ctx.fill();
-}
-
-function _backwardsAnimation(ctx: CanvasRenderingContext2D, deliveryPoint: { x: number; y: number }, store: { x: number; y: number }) {
+function backwardsAnimation(ctx: CanvasRenderingContext2D, deliveryPoint: IPoint, store: IPoint) {
   const xStepValue = (deliveryPoint.x - store.x) / 80;
   const yStepValue = (deliveryPoint.y - store.y) / 80;
 
@@ -86,79 +123,17 @@ function _backwardsAnimation(ctx: CanvasRenderingContext2D, deliveryPoint: { x: 
   }, 100);
 }
 
-function _animateDelivery(ctx: CanvasRenderingContext2D, store: { x: number; y: number }, deliveryPoint: { x: number; y: number }) {
-  const xStepValue = (deliveryPoint.x - store.x) / 80;
-  const yStepValue = (deliveryPoint.y - store.y) / 80;
+function _moveScooter(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.beginPath();
 
-  let xDelta = store.x;
-  let yDelta = store.y;
-
-  const interval = setInterval(() => {
-    if (deliveryPoint.x > store.x) {
-      if (xDelta <= deliveryPoint.x) {
-        xStepValue > 0 ? (xDelta += xStepValue) : (xDelta -= Math.abs(xStepValue));
-      }
-    } else {
-      if (xDelta >= deliveryPoint.x) {
-        xStepValue > 0 ? (xDelta += xStepValue) : (xDelta -= Math.abs(xStepValue));
-      }
-    }
-    if (deliveryPoint.y > store.y) {
-      if (yDelta <= deliveryPoint.y) {
-        yStepValue > 0 ? (yDelta += yStepValue) : (yDelta -= Math.abs(yStepValue));
-      }
-    } else {
-      if (yDelta >= deliveryPoint.y) {
-        yStepValue > 0 ? (yDelta += yStepValue) : (yDelta -= Math.abs(yStepValue));
-      }
-    }
-
-    if (deliveryPoint.x > store.x && deliveryPoint.y > store.y) {
-      if (xDelta >= deliveryPoint.x && yDelta >= deliveryPoint.y) {
-        _backwardsAnimation(ctx, store, deliveryPoint);
-        clearInterval(interval);
-      }
-    } else if (deliveryPoint.x > store.x && deliveryPoint.y < store.y) {
-      if (xDelta >= deliveryPoint.x && yDelta <= deliveryPoint.y) {
-        _backwardsAnimation(ctx, store, deliveryPoint);
-        clearInterval(interval);
-      }
-    } else if (deliveryPoint.x < store.x && deliveryPoint.y > store.y) {
-      if (xDelta <= deliveryPoint.x && yDelta >= deliveryPoint.y) {
-        _backwardsAnimation(ctx, store, deliveryPoint);
-        clearInterval(interval);
-      }
-    } else if (deliveryPoint.x < store.x && deliveryPoint.y < store.y) {
-      if (xDelta <= deliveryPoint.x && yDelta <= deliveryPoint.y) {
-        _backwardsAnimation(ctx, store, deliveryPoint);
-        clearInterval(interval);
-      }
-    }
-
-    _moveScooter(ctx, xDelta, yDelta);
-  }, 100);
+  ctx.fillStyle = '#0000ff';
+  ctx.arc(x, y, 4, 0, 2 * Math.PI);
+  ctx.fill();
 }
 
-export default function Canvas() {
-  const canvasRef = React.useRef(null);
-  let ctx: any = null;
+function _moveScooterBackwards(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.beginPath();
 
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    ctx = canvas.getContext('2d');
-  }, []);
-
-  function drawStore(x: number, y: number) {
-    _drawStore(ctx, x, y);
-  }
-
-  function drawDeliveryPoint(point: Point) {
-    _drawDeliveryPoint(ctx, point.x, point.y);
-  }
-
-  function animateDelivery(store: { x: number; y: number }, deliveryPoint: { x: number; y: number }, context: CanvasRenderingContext2D) {
-    _animateDelivery(context, store, deliveryPoint);
-  }
-
-  return [canvasRef, ctx, drawStore, drawDeliveryPoint, animateDelivery];
+  // clip the arc and clear given position
+  ctx.clearRect(x - 12, y - 12, 24, 24);
 }

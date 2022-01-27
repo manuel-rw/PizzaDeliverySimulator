@@ -1,64 +1,39 @@
 import * as React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
-import Canvas from './components/Canvas';
 import { Game } from './models';
-
-interface Order {
-  id: number;
-  gameId: number;
-  deliveryTime: number;
-  position: Point;
-  amountOfOrders: number;
-  type: string;
-}
-
-interface Point {
-  x: number;
-  y: number;
-}
 import InformationPizzeria from './components/InformationPizzeria';
 import InformationDeliveries from './components/InformationDeliveries';
+import { GameField, GameFieldMesh, StorePoint, DeliveryPoint, DeliveryAnimation } from './components/game';
 
 export default function Simulate() {
-  const location = useLocation().state;
-  const game = location as Game;
+  const location: any = useLocation().state;
+  const game = new Game(location.id, location.field, location.store, location.maxPizza, location.maxScooter, location.orders);
+  console.log(game.getMatrix());
   const navigate = useNavigate();
-  const isMounted = React.useRef(true);
-  const [canvasRef, ctx, drawStore, drawDeliveryPoint, animateDelivery] = Canvas();
+  const gameFieldReference = GameField(game.field.width, game.field.height);
+  const gameFieldMeshRef = GameFieldMesh(game);
+  const storePointRef = StorePoint(game);
+  const deliveryPointRef = DeliveryPoint(game);
+  const { deliveryAnimationRef, animateDelivery } = DeliveryAnimation(game);
 
   // get current BrowserWindow
   const win = window as any;
   // resize the window to the size of the game field
-  win.resizeTo(game.field.width + 600, game.field.height + 150);
-
-  React.useEffect(() => {
-    game.orders.forEach((order) => {
-      drawDeliveryPoint(order.position);
-    });
-
-    drawStore(game.store.x, game.store.y);
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, [isMounted]);
+  win.resizeTo(game.field.width + 300, game.field.height + 150);
 
   return (
     <>
       <div className="game-details-wrapper">
-        <div style={{ paddingLeft: '20px', paddingTop: '20px' }}>
-          <canvas
-            id="field"
-            width={game.field.width}
-            height={game.field.height}
-            style={{
-              border: '1px solid black',
-              backgroundColor: '#222',
-            }}
-            ref={canvasRef}
-          />
-          <div style={{ marginRight: 'auto', paddingTop: '5px' }}>
+        <div style={{ paddingLeft: '20px', paddingTop: '20px', display: 'flex', height: game.field.height + 60 }}>
+          <div className="game-layers">
+            <canvas ref={gameFieldReference}></canvas>
+            <canvas ref={gameFieldMeshRef}></canvas>
+            <canvas ref={storePointRef}></canvas>
+            <canvas ref={deliveryPointRef}></canvas>
+            <canvas ref={deliveryAnimationRef}></canvas>
+          </div>
+          <div style={{ marginRight: 'auto', marginTop: 'auto', paddingTop: '5px' }}>
             <Button
               variant="outlined"
               onClick={() => {
@@ -70,13 +45,7 @@ export default function Simulate() {
               variant="outlined"
               color="success"
               onClick={() => {
-                for (let i = 0; i < game.orders.length; i++) {
-                  animateDelivery(
-                    { x: game.store.x, y: game.store.y },
-                    { x: game.orders[i].position.x, y: game.orders[i].position.y },
-                    canvasRef.current.getContext('2d'),
-                  );
-                }
+                animateDelivery();
               }}>
               Animate
             </Button>

@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { HashRouter, Link, Route, Routes } from 'react-router-dom';
 import GameListLoadingSkeleton from './components/GameListLoadingSkeleton';
-import { Game } from './models';
+import { Game, IGame, Order, Field, Point } from './models';
 import Simulate from './simulate';
 
 export default function App() {
@@ -13,7 +13,7 @@ export default function App() {
   // resize the window to the size of the game field
   win.resizeTo(960, 830);
 
-  const [games, setGames] = React.useState<Game[]>([]);
+  const [games, setGames] = React.useState<IGame[]>([]);
 
   React.useEffect(() => {
     fetch('https://lesta.iet-gibb.ch/pizza/api/Spiel', {
@@ -21,17 +21,19 @@ export default function App() {
     })
       .then((response) => response.json())
       .then((data: any) => {
-        const g: Game[] = [];
+        const g: IGame[] = [];
         const maxGames = data.length > 9 ? 9 : data.length;
         for (let i = 0; i < maxGames; i++) {
-          g.push({
-            id: data[i].id,
-            field: { width: data[i].spielfeldX, height: data[i].spielfeldY },
-            store: { x: data[i].zentraleX, y: data[i].zentraleY },
-            maxPizza: data[i].maxPizza,
-            maxScooter: data[i].maxScooter,
-            orders: [],
-          });
+          g.push(
+            new Game(
+              data[i].id,
+              new Field(data[i].spielfeldX, data[i].spielfeldY),
+              new Point(data[i].zentraleX, data[i].zentraleY),
+              data[i].maxPizza,
+              data[i].maxScooter,
+              [],
+            ),
+          );
         }
         setGames(g);
 
@@ -57,7 +59,7 @@ export default function App() {
                 </Typography>
                 {game.orders.length > 0 && (
                   <Typography variant="h5" component="div">
-                    Amount of Scooters: {game.orders.reduce((acc, cur) => acc + cur.amountOfOrders, 0)}
+                    Amount of Scooters: {game.getAmountOfScooters()}
                   </Typography>
                 )}
                 <Typography sx={{ mb: 1.5 }} color="text.secondary">
@@ -83,21 +85,17 @@ export default function App() {
   );
 }
 
-function getAndAssignGameOrders(gameList: Game[]) {
+function getAndAssignGameOrders(gameList: IGame[]) {
   gameList.forEach((game) => {
     fetch(`https://lesta.iet-gibb.ch/pizza/api/Spiel/${game.id}/bestellung`, {
       method: 'GET',
     })
       .then((response) => response.json())
       .then((orderData: any) => {
-        game.orders = orderData.map((order: any) => ({
-          id: order.id,
-          gameId: order.spielId,
-          deliveryTime: order.zeitpunkt,
-          position: { x: order.positionX, y: order.positionY },
-          amountOfOrders: order.anzahl,
-          type: order.typ,
-        }));
+        game.orders = orderData.map(
+          (order: any) =>
+            new Order(order.id, order.spielId, order.zeitpunkt, new Point(order.positionX, order.positionY), order.anzahl, order.typ),
+        );
       });
   });
 }

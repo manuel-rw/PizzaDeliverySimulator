@@ -1,8 +1,8 @@
 import React from 'react';
-import { Game } from '../models';
-import DeliveryTimeCalculation from './DeliveryTimeCalculation';
+import { Game, IGame } from '../models';
 
-export default function InformationDeliveries(game: Game) {
+export default function InformationDeliveries(g: IGame) {
+  const game = new Game(g.id, g.field, g.store, g.maxPizza, g.maxScooter, g.orders);
   return (
     <>
       <h3>Information Deliveries</h3>
@@ -25,7 +25,7 @@ export default function InformationDeliveries(game: Game) {
           </small>{' '}
           <br />
           <small>
-            Expected delivery time: <strong>{<DeliveryTimeCalculation game={game} orderId={order.id} />}min</strong>
+            Expected delivery time: <strong>{game.calculateTimeToDelivery(order)}min</strong>
           </small>
         </div>
       ))}
