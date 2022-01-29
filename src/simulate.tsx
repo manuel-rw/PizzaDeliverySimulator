@@ -9,7 +9,6 @@ import { GameField, GameFieldMesh, StorePoint, DeliveryPoint, DeliveryAnimation,
 export default function Simulate() {
   const location: any = useLocation().state;
   const game = new Game(location.id, location.field, location.store, location.maxPizza, location.maxScooter, location.orders);
-  console.log(game.getMatrix());
   const navigate = useNavigate();
   const gameFieldReference = GameField(game.field.width, game.field.height);
   const gameFieldMeshRef = GameFieldMesh(game);

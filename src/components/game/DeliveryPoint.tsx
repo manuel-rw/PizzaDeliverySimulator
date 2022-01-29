@@ -21,6 +21,12 @@ function drawDeliveryPoint(ctx: CanvasRenderingContext2D, point: IPoint) {
   ctx.beginPath();
 
   ctx.fillStyle = '#00ff00';
-  ctx.rect(point.x, point.y, -15, -15);
+  ctx.rect(point.x - 8, point.y - 8, 16, 16);
+  ctx.fill();
+
+  ctx.beginPath();
+
+  ctx.fillStyle = '#ff0000';
+  ctx.arc(point.x, point.y, 1, 0, 2 * Math.PI);
   ctx.fill();
 }

@@ -22,4 +22,9 @@ function drawStore(ctx: CanvasRenderingContext2D, point: IPoint) {
   ctx.fillStyle = '#ff0000';
   ctx.arc(point.x, point.y, 10, 0, 2 * Math.PI);
   ctx.fill();
+
+  ctx.beginPath();
+  ctx.fillStyle = '#00ff00';
+  ctx.arc(point.x, point.y, 1, 0, 2 * Math.PI);
+  ctx.fill();
 }

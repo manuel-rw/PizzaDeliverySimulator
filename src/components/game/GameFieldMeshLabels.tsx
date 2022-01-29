@@ -1,6 +1,6 @@
 import React from 'react';
 import { OFFSET_PIXEL_PRO_SECOND, PIXEL_PRO_SECOND } from '../../constants/properties';
-import { IGame } from '../../models';
+import { IGame, IPoint } from '../../models';
 import { defaultCanvasProperties, Layers } from './Layers';
 
 // TODO complete this function later
@@ -20,38 +20,34 @@ export function GameFieldMeshLabels(game: IGame) {
 function drawMeshLabels(ctx: CanvasRenderingContext2D, game: IGame) {
   ctx.beginPath();
 
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-  ctx.font = '12px Arial';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.font = '44px Arial';
 
   const matrix = game.getMatrix();
+  console.log('Matrix: ', matrix);
 
-  let yAxisOffset = 0;
-  if (game.store.y % PIXEL_PRO_SECOND != 0) {
-    // if store is not aligned with the grid
-    let squares = (game.store.y - OFFSET_PIXEL_PRO_SECOND) / PIXEL_PRO_SECOND + 1; // how many squares are there from the store to the 0 position of y axis
-    squares = parseInt((squares + '').split('.')[0]); // remove the decimal part
-    yAxisOffset = squares * PIXEL_PRO_SECOND; // how many pixels are there from the store to the 0 position of y axis + offset
-  } else {
-    yAxisOffset = (game.store.y / PIXEL_PRO_SECOND) * PIXEL_PRO_SECOND;
-  }
-  let xAxisOffset = 0;
-  if (game.store.x % PIXEL_PRO_SECOND != 0) {
-    // if store is not aligned with the grid
-    xAxisOffset = parseInt((game.store.x / PIXEL_PRO_SECOND + 1 + '').split('.')[0]) * PIXEL_PRO_SECOND;
-  } else {
-    xAxisOffset = (game.store.x / PIXEL_PRO_SECOND) * PIXEL_PRO_SECOND;
-  }
+  const xAxisOffset = measureAxisOffset(game.store.x);
+  const yAxisOffset = measureAxisOffset(game.store.y);
 
   for (let i = 0; i < matrix.length; i++) {
+    const centerY = i * PIXEL_PRO_SECOND + yAxisOffset + OFFSET_PIXEL_PRO_SECOND;
     for (let j = 0; j < matrix[i].length; j++) {
-      const centerY =
-        i * PIXEL_PRO_SECOND + (yAxisOffset - game.store.y + Math.abs(yAxisOffset - game.store.y - 70)) - OFFSET_PIXEL_PRO_SECOND;
-      const centerX =
-        j * PIXEL_PRO_SECOND + (xAxisOffset - game.store.x + Math.abs(xAxisOffset - game.store.x - 80)) - OFFSET_PIXEL_PRO_SECOND;
-
+      const centerX = j * PIXEL_PRO_SECOND + xAxisOffset + OFFSET_PIXEL_PRO_SECOND;
       if (matrix[i][j] === 0) {
-        ctx.fillText('0', centerX, centerY);
+        ctx.fillText('0', centerX - 10, centerY + 15);
+      }
+      if (matrix[i][j] === 1) {
+        ctx.fillText('1', centerX - 10, centerY + 15);
+      }
+      if (matrix[i][j] === 2) {
+        ctx.fillText('2', centerX - 10, centerY + 15);
       }
     }
   }
+}
+
+function measureAxisOffset(storeAxisPosition: number): number {
+  const decimalOfDivision = (storeAxisPosition - OFFSET_PIXEL_PRO_SECOND) % PIXEL_PRO_SECOND;
+  const restOfSubtraction = PIXEL_PRO_SECOND - decimalOfDivision;
+  return -Math.abs(restOfSubtraction);
 }
