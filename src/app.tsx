@@ -59,7 +59,7 @@ export default function App() {
                 </Typography>
                 {game.orders.length > 0 && (
                   <Typography variant="h5" component="div">
-                    Amount of Scooters: {game.getAmountOfScooters()}
+                    Pizzas ordered: {game.getAmountOfOrders()}
                   </Typography>
                 )}
                 <Typography sx={{ mb: 1.5 }} color="text.secondary">

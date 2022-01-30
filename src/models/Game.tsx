@@ -13,7 +13,7 @@ export interface IGame {
   maxPizza: number;
   maxScooter: number;
   orders: IOrder[];
-  getAmountOfScooters?(): number;
+  getAmountOfOrders?(): number;
   calculateTimeToDelivery?(order: IOrder): number;
   getMatrix?(): number[][];
 }
@@ -35,10 +35,10 @@ export class Game implements IGame {
     this.orders = orders;
   }
 
-  // TODO: there is only one scooter. Fix this to count the amount of maximal scooter capacity
-  getAmountOfScooters(): number {
+  getAmountOfOrders(): number {
     return this.orders.reduce((acc, cur) => acc + cur.amountOfOrders, 0);
   }
+
   calculateTimeToDelivery(order: IOrder): number {
     return Math.round(Math.hypot(this.store.x - order.position.x, this.store.y - order.position.y) / SCOOTER_SPEED) + TIME_TO_PREPARATION;
   }
