@@ -4,15 +4,15 @@ import { Button } from '@mui/material';
 import { Game } from './models';
 import InformationPizzeria from './components/InformationPizzeria';
 import InformationDeliveries from './components/InformationDeliveries';
-import { GameField, GameFieldMesh, StorePoint, DeliveryPoint, DeliveryAnimation } from './components/game';
+import { GameField, GameFieldMesh, StorePoint, DeliveryPoint, DeliveryAnimation, GameFieldMeshLabels } from './components/game';
 
 export default function Simulate() {
   const location: any = useLocation().state;
   const game = new Game(location.id, location.field, location.store, location.maxPizza, location.maxScooter, location.orders);
-  console.log(game.getMatrix());
   const navigate = useNavigate();
   const gameFieldReference = GameField(game.field.width, game.field.height);
   const gameFieldMeshRef = GameFieldMesh(game);
+  const gameFieldMeshLabelsRef = GameFieldMeshLabels(game);
   const storePointRef = StorePoint(game);
   const deliveryPointRef = DeliveryPoint(game);
   const { deliveryAnimationRef, animateDelivery } = DeliveryAnimation(game);
@@ -32,6 +32,7 @@ export default function Simulate() {
             <canvas ref={storePointRef}></canvas>
             <canvas ref={deliveryPointRef}></canvas>
             <canvas ref={deliveryAnimationRef}></canvas>
+            <canvas ref={gameFieldMeshLabelsRef}></canvas>
           </div>
           <div style={{ marginRight: 'auto', marginTop: 'auto', paddingTop: '5px' }}>
             <Button

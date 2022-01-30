@@ -34,6 +34,8 @@ export class Game implements IGame {
     this.maxScooter = maxScooter;
     this.orders = orders;
   }
+
+  // TODO: there is only one scooter. Fix this to count the amount of maximal scooter capacity
   getAmountOfScooters(): number {
     return this.orders.reduce((acc, cur) => acc + cur.amountOfOrders, 0);
   }
@@ -47,8 +49,8 @@ export class Game implements IGame {
     matrix[this.__getStoreRowPosition()][this.__getStoreColumnPosition()] = 1;
 
     this.orders.forEach((order) => {
-      const orderRowPosition = this.__getOrderRowPosition(order.position.y, matrix.length * PIXEL_PRO_SECOND);
-      const orderColumnPosition = this.__getOrderColumnPosition(order.position.x, matrix[0].length * PIXEL_PRO_SECOND);
+      const orderRowPosition = this.__getOrderRowPosition(order.position.y);
+      const orderColumnPosition = this.__getOrderColumnPosition(order.position.x);
 
       matrix[orderRowPosition][orderColumnPosition] = 2;
     });
@@ -56,87 +58,81 @@ export class Game implements IGame {
     return matrix;
   }
 
-  private __getOrderRowPosition(orderY: number, height: number): number {
-    let orderPosition = this.__getStoreRowPosition();
+  private __getOrderRowPosition(orderY: number): number {
+    let orderPosition = 0;
 
-    if (orderY <= this.__getStoreRowPosition() * PIXEL_PRO_SECOND) {
-      for (let i = this.__getStoreRowPosition() * PIXEL_PRO_SECOND; i > 0; i -= PIXEL_PRO_SECOND) {
-        if (orderY <= i && orderY >= i - PIXEL_PRO_SECOND) {
-          return orderPosition;
+    const rows = this.__getRows();
+
+    rows.forEach((row, index) => {
+      Object.values(row).forEach((value) => {
+        if (orderY >= value[0] && orderY <= value[1]) {
+          orderPosition = index;
         }
-        orderPosition--;
-      }
-    } else {
-      for (let i = this.__getStoreRowPosition() * PIXEL_PRO_SECOND; i < height; i += PIXEL_PRO_SECOND) {
-        if (orderY >= i && orderY <= i + PIXEL_PRO_SECOND) {
-          return orderPosition;
-        }
-        orderPosition++;
-      }
-    }
+      });
+    });
 
     return orderPosition;
   }
 
-  private __getOrderColumnPosition(orderX: number, width: number): number {
-    let orderPosition = this.__getStoreColumnPosition();
+  private __getOrderColumnPosition(orderX: number): number {
+    let orderPosition = 0;
 
-    if (orderX <= this.__getStoreColumnPosition() * PIXEL_PRO_SECOND) {
-      for (let i = this.__getStoreColumnPosition() * PIXEL_PRO_SECOND; i > 0; i -= PIXEL_PRO_SECOND) {
-        if (orderX <= i && orderX >= i - PIXEL_PRO_SECOND) {
-          return orderPosition;
+    const columns = this.__getColumns();
+
+    columns.forEach((column, index) => {
+      // for each key in the column
+      Object.values(column).forEach((value) => {
+        // if the value of the key is less or more than the order x coordinate
+        if (value[0] <= orderX && value[1] >= orderX) {
+          orderPosition = index;
         }
-        orderPosition--;
-      }
-    } else {
-      for (let i = this.__getStoreColumnPosition() * PIXEL_PRO_SECOND; i < width; i += PIXEL_PRO_SECOND) {
-        if (orderX >= i && orderX <= i + PIXEL_PRO_SECOND) {
-          return orderPosition;
-        }
-        orderPosition++;
-      }
-    }
+      });
+    });
 
     return orderPosition;
   }
 
   private __getStoreColumnPosition(): number {
+    // Let's assume that the store is in the first column
     let storePosition = 0;
-    if (this.store.x - OFFSET_PIXEL_PRO_SECOND < 0) {
-      return storePosition;
-    }
 
-    for (let i = this.store.x - OFFSET_PIXEL_PRO_SECOND; i > 0; i -= PIXEL_PRO_SECOND) {
-      if (i > 0 && i - PIXEL_PRO_SECOND < 0) {
-        storePosition++;
-        break;
+    // Each column has the value of x coordinate as an array [x1, x2] e.g start and end of the column
+    const columns = this.__getColumns();
+    console.log('Columns: ', columns);
+
+    columns.forEach((column, index) => {
+      // Check the key of an object in the column
+      // If it equals 1 (store), we return the column number
+      if (1 in column) {
+        storePosition = index;
       }
-
-      storePosition++;
-    }
+    });
 
     return storePosition;
   }
 
   private __getStoreRowPosition(): number {
+    // Let's assume that the store is in the first row
     let storePosition = 0;
-    if (this.store.y - OFFSET_PIXEL_PRO_SECOND < 0) {
-      return storePosition;
-    }
 
-    for (let i = this.store.y - OFFSET_PIXEL_PRO_SECOND; i > 0; i -= PIXEL_PRO_SECOND) {
-      if (i > 0 && i - PIXEL_PRO_SECOND < 0) {
-        storePosition++;
-        break;
+    // Each row has the value of y coordinate as an array [y1, y2] e.g start and end of the row
+    const rows = this.__getRows();
+    console.log('Rows: ', rows);
+
+    rows.forEach((row, index) => {
+      // Check the key of an object in the row
+      // If it equals 1 (store), we return the row number
+      if (1 in row) {
+        storePosition = index;
       }
-
-      storePosition++;
-    }
+    });
 
     return storePosition;
   }
 
   private __getPlainMatrix(): number[][] {
+    // This function creates a matrix of rows and columns without any values in the array
+    // [[], [], [], ...]
     const matrix = [];
 
     for (let i = 0; i < this.__getRows().length; i++) {
@@ -149,51 +145,50 @@ export class Game implements IGame {
     return matrix;
   }
 
-  private __getRows(): any[] {
+  private __getRows(): ({ 1: number[] } | { 0: number[] })[] {
+    // We count the rows always from the position of the store
+    // Store should be always in the middle of the Node e.g row+column #
     const rows = [];
+
+    // We add one row right before the counting starts
+    // This row represents the row where the store is
+    rows.push({ 1: [this.store.y - OFFSET_PIXEL_PRO_SECOND, this.store.y + OFFSET_PIXEL_PRO_SECOND] });
+
+    // First count the rows from store to the bottom of the field
+    // We add the offset e.g 40 Pixels
     for (let i = this.store.y + OFFSET_PIXEL_PRO_SECOND; i < this.field.height; i += PIXEL_PRO_SECOND) {
-      if (i < this.field.height && i + PIXEL_PRO_SECOND > this.field.height) {
-        rows.push([]);
-        break;
-      }
-
-      rows.push([]);
+      rows.push({ 0: [i, i + PIXEL_PRO_SECOND] });
     }
 
+    // Then count the rows from store to the top of the field
     for (let i = this.store.y - OFFSET_PIXEL_PRO_SECOND; i > 0; i -= PIXEL_PRO_SECOND) {
-      if (i > 0 && i - PIXEL_PRO_SECOND < 0) {
-        rows.push([]);
-        break;
-      }
-
-      rows.push([]);
+      // Prepend the row to the array
+      rows.unshift({ 0: [i - PIXEL_PRO_SECOND, i] });
     }
 
-    rows.push([]);
     return rows;
   }
 
-  private __getColumns(): any[] {
+  private __getColumns(): ({ 1: number[] } | { 0: number[] })[] {
+    // We count the columns always from the position of the store
+    // Store should be always in the middle of the Node e.g column+row #
     const columns = [];
+
+    // We add one column right before the counting starts
+    // This column represents the column where the store is
+    columns.push({ 1: [this.store.x - OFFSET_PIXEL_PRO_SECOND, this.store.x + OFFSET_PIXEL_PRO_SECOND] });
+
+    // First count the columns from store to the right of the field
     for (let i = this.store.x + OFFSET_PIXEL_PRO_SECOND; i < this.field.width; i += PIXEL_PRO_SECOND) {
-      if (i < this.field.width && i + PIXEL_PRO_SECOND > this.field.width) {
-        columns.push([]);
-        break;
-      }
-
-      columns.push([]);
+      columns.push({ 0: [i, i + PIXEL_PRO_SECOND] });
     }
 
+    // Then count the columns from store to the left of the field
     for (let i = this.store.x - OFFSET_PIXEL_PRO_SECOND; i > 0; i -= PIXEL_PRO_SECOND) {
-      if (i > 0 && i - PIXEL_PRO_SECOND < 0) {
-        columns.push([]);
-        break;
-      }
-
-      columns.push([]);
+      // Prepend the column to the array
+      columns.unshift({ 0: [i - PIXEL_PRO_SECOND, i] });
     }
 
-    columns.push([]);
     return columns;
   }
 }
