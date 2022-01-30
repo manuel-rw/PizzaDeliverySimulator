@@ -16,6 +16,8 @@ export interface IGame {
   getAmountOfOrders?(): number;
   calculateTimeToDelivery?(order: IOrder): number;
   getMatrix?(): number[][];
+  getStoreRowPosition?(): number;
+  getStoreColumnPosition?(): number;
 }
 
 export class Game implements IGame {
@@ -46,7 +48,7 @@ export class Game implements IGame {
   getMatrix(): number[][] {
     const matrix = this.__getPlainMatrix();
 
-    matrix[this.__getStoreRowPosition()][this.__getStoreColumnPosition()] = 1;
+    matrix[this.getStoreRowPosition()][this.getStoreColumnPosition()] = 1;
 
     this.orders.forEach((order) => {
       const orderRowPosition = this.__getOrderRowPosition(order.position.y);
@@ -56,6 +58,44 @@ export class Game implements IGame {
     });
 
     return matrix;
+  }
+
+  getStoreColumnPosition(): number {
+    // Let's assume that the store is in the first column
+    let storePosition = 0;
+
+    // Each column has the value of x coordinate as an array [x1, x2] e.g start and end of the column
+    const columns = this.__getColumns();
+    console.log('Columns: ', columns);
+
+    columns.forEach((column, index) => {
+      // Check the key of an object in the column
+      // If it equals 1 (store), we return the column number
+      if (1 in column) {
+        storePosition = index;
+      }
+    });
+
+    return storePosition;
+  }
+
+  getStoreRowPosition(): number {
+    // Let's assume that the store is in the first row
+    let storePosition = 0;
+
+    // Each row has the value of y coordinate as an array [y1, y2] e.g start and end of the row
+    const rows = this.__getRows();
+    console.log('Rows: ', rows);
+
+    rows.forEach((row, index) => {
+      // Check the key of an object in the row
+      // If it equals 1 (store), we return the row number
+      if (1 in row) {
+        storePosition = index;
+      }
+    });
+
+    return storePosition;
   }
 
   private __getOrderRowPosition(orderY: number): number {
@@ -90,44 +130,6 @@ export class Game implements IGame {
     });
 
     return orderPosition;
-  }
-
-  private __getStoreColumnPosition(): number {
-    // Let's assume that the store is in the first column
-    let storePosition = 0;
-
-    // Each column has the value of x coordinate as an array [x1, x2] e.g start and end of the column
-    const columns = this.__getColumns();
-    console.log('Columns: ', columns);
-
-    columns.forEach((column, index) => {
-      // Check the key of an object in the column
-      // If it equals 1 (store), we return the column number
-      if (1 in column) {
-        storePosition = index;
-      }
-    });
-
-    return storePosition;
-  }
-
-  private __getStoreRowPosition(): number {
-    // Let's assume that the store is in the first row
-    let storePosition = 0;
-
-    // Each row has the value of y coordinate as an array [y1, y2] e.g start and end of the row
-    const rows = this.__getRows();
-    console.log('Rows: ', rows);
-
-    rows.forEach((row, index) => {
-      // Check the key of an object in the row
-      // If it equals 1 (store), we return the row number
-      if (1 in row) {
-        storePosition = index;
-      }
-    });
-
-    return storePosition;
   }
 
   private __getPlainMatrix(): number[][] {
