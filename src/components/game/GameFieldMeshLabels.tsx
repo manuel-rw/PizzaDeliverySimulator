@@ -1,6 +1,6 @@
 import React from 'react';
 import { OFFSET_PIXEL_PRO_SECOND, PIXEL_PRO_SECOND } from '../../constants/properties';
-import { IGame, IPoint } from '../../models';
+import { IGame } from '../../models';
 import { defaultCanvasProperties, Layers } from './Layers';
 
 // TODO complete this function later
