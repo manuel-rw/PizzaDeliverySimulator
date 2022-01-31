@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
 import { Game } from './models';
 import InformationPizzeria from './components/InformationPizzeria';
 import InformationDeliveries from './components/InformationDeliveries';
-import { GameField, GameFieldMesh, StorePoint, DeliveryPoint, DeliveryAnimation, GameFieldMeshLabels } from './components/game';
+import { GameField, GameFieldMesh, StorePoint, DeliveryPoint, DeliveryAnimationV2, GameFieldMeshLabels } from './components/game';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Simulate() {
   const location: any = useLocation().state;
@@ -15,7 +15,7 @@ export default function Simulate() {
   const gameFieldMeshLabelsRef = GameFieldMeshLabels(game);
   const storePointRef = StorePoint(game);
   const deliveryPointRef = DeliveryPoint(game);
-  const { deliveryAnimationRef, animateDelivery } = DeliveryAnimation(game);
+  const { deliveryAnimationRef, animateDelivery } = DeliveryAnimationV2(game);
 
   // get current BrowserWindow
   const win = window as any;

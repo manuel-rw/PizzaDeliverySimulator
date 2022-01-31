@@ -6,6 +6,22 @@ import { IPoint } from './Point';
 const SCOOTER_SPEED = 80;
 const TIME_TO_PREPARATION = 1;
 
+type IPath = 'North' | 'East' | 'South' | 'West';
+
+export type IPathLocation = {
+  path: IPath[];
+  row: number;
+  column: number;
+};
+
+interface ILocation {
+  // 0 - not visited, 1 - start, 2 - end, 3 - visited, 4 - invalid, 5 - blocked
+  row: number;
+  column: number;
+  path: IPath[];
+  status: 0 | 1 | 2 | 3 | 4 | 5;
+}
+
 export interface IGame {
   id: number;
   field: IField;
@@ -18,6 +34,10 @@ export interface IGame {
   getMatrix?(): number[][];
   getStoreRowPosition?(): number;
   getStoreColumnPosition?(): number;
+  getOrdersSortedByDeliveryTime?(): IOrder[];
+  findShortestPath?(start: number[], end: number[], matrix: number[][]): IPathLocation;
+  // calculateShortestPath?(): any;
+  getSortedListOfPathsByShorterFirst?(matrix: number[][]): IPathLocation[];
 }
 
 export class Game implements IGame {
@@ -35,6 +55,22 @@ export class Game implements IGame {
     this.maxPizza = maxPizza;
     this.maxScooter = maxScooter;
     this.orders = orders;
+
+    // console.log('Rows: ', this.__getRows());
+    // console.log('Columns: ', this.__getColumns());
+    // console.log('Shortest path: ', this.calculateShortestPath());
+  }
+
+  getOrdersSortedByDeliveryTime(): IOrder[] {
+    return this.orders.sort((a, b) => {
+      if (a.deliveryTime < b.deliveryTime) {
+        return -1;
+      }
+      if (a.deliveryTime > b.deliveryTime) {
+        return 1;
+      }
+      return 0;
+    });
   }
 
   getAmountOfOrders(): number {
@@ -66,7 +102,6 @@ export class Game implements IGame {
 
     // Each column has the value of x coordinate as an array [x1, x2] e.g start and end of the column
     const columns = this.__getColumns();
-    console.log('Columns: ', columns);
 
     columns.forEach((column, index) => {
       // Check the key of an object in the column
@@ -85,7 +120,6 @@ export class Game implements IGame {
 
     // Each row has the value of y coordinate as an array [y1, y2] e.g start and end of the row
     const rows = this.__getRows();
-    console.log('Rows: ', rows);
 
     rows.forEach((row, index) => {
       // Check the key of an object in the row
@@ -96,6 +130,111 @@ export class Game implements IGame {
     });
 
     return storePosition;
+  }
+
+  getSortedListOfPathsByShorterFirst(matrix: [][]): IPathLocation[] {
+    const listOfAllPaths: IPathLocation[] = [];
+
+    this.orders.forEach((order) => {
+      const orderRowPosition = this.__getOrderRowPosition(order.position.y);
+      const orderColumnPosition = this.__getOrderColumnPosition(order.position.x);
+
+      const start = [this.getStoreRowPosition(), this.getStoreColumnPosition()];
+      const end = [orderRowPosition, orderColumnPosition];
+
+      const path = this.findShortestPath(start, end, matrix);
+
+      listOfAllPaths.push(path);
+    });
+
+    return listOfAllPaths.sort((a, b) => {
+      if (a.path.length < b.path.length) {
+        return -1;
+      }
+      if (a.path.length > b.path.length) {
+        return 1;
+      }
+      return 0;
+    });
+  }
+
+  findShortestPath(startingPosition: number[], goal: number[], matrix: number[][]): IPathLocation {
+    const location: ILocation = {
+      row: startingPosition[0],
+      column: startingPosition[1],
+      path: [],
+      status: 0,
+    };
+
+    const queue = [location];
+
+    while (queue.length > 0) {
+      const currentLocation = queue.shift();
+
+      let newLocation = this.__exploreInDirection(currentLocation, 'North', matrix);
+      if (newLocation.status === 2 && newLocation.row === goal[0] && newLocation.column === goal[1]) {
+        return {
+          path: newLocation.path,
+          row: newLocation.row,
+          column: newLocation.column,
+        };
+      } else if (newLocation.status === 0) {
+        queue.push(newLocation);
+      }
+
+      newLocation = this.__exploreInDirection(currentLocation, 'East', matrix);
+      if (newLocation.status === 2 && newLocation.row === goal[0] && newLocation.column === goal[1]) {
+        return {
+          path: newLocation.path,
+          row: newLocation.row,
+          column: newLocation.column,
+        };
+      } else if (newLocation.status === 0) {
+        queue.push(newLocation);
+      }
+
+      newLocation = this.__exploreInDirection(currentLocation, 'South', matrix);
+      if (newLocation.status === 2 && newLocation.row === goal[0] && newLocation.column === goal[1]) {
+        return {
+          path: newLocation.path,
+          row: newLocation.row,
+          column: newLocation.column,
+        };
+      } else if (newLocation.status === 0) {
+        queue.push(newLocation);
+      }
+
+      newLocation = this.__exploreInDirection(currentLocation, 'West', matrix);
+      if (newLocation.status === 2 && newLocation.row === goal[0] && newLocation.column === goal[1]) {
+        return {
+          path: newLocation.path,
+          row: newLocation.row,
+          column: newLocation.column,
+        };
+      } else if (newLocation.status === 0) {
+        queue.push(newLocation);
+      }
+    }
+  }
+
+  calculateShortestPath() {
+    // NOTE: This is dummy function to check some theory
+    const calculation: { orderPosition: number[]; deliveryTime: number; stepsNeeded: number; path: IPath[]; theoryCalc: number }[] = [];
+    this.orders.forEach((order) => {
+      const start = [this.getStoreRowPosition(), this.getStoreColumnPosition()];
+      const row = this.__getOrderRowPosition(order.position.y);
+      const column = this.__getOrderColumnPosition(order.position.x);
+      const path = this.findShortestPath(start, [row, column], this.getMatrix());
+      calculation.push({
+        orderPosition: [row, column],
+        deliveryTime: order.deliveryTime,
+        stepsNeeded: path.path.length,
+        path: path.path,
+        theoryCalc: order.deliveryTime / path.path.length,
+      });
+    });
+
+    console.log(calculation);
   }
 
   private __getOrderRowPosition(orderY: number): number {
@@ -192,5 +331,65 @@ export class Game implements IGame {
     }
 
     return columns;
+  }
+
+  // Explores the grid from the given location in the given
+  // direction
+  private __exploreInDirection(currentLocation: ILocation, direction: IPath, matrix: number[][]): ILocation {
+    const newPath = currentLocation.path.slice();
+    newPath.push(direction);
+
+    let row = currentLocation.row;
+    let col = currentLocation.column;
+
+    if (direction === 'North') {
+      row -= 1;
+    } else if (direction === 'East') {
+      col += 1;
+    } else if (direction === 'South') {
+      row += 1;
+    } else if (direction === 'West') {
+      col -= 1;
+    }
+
+    const newLocation: ILocation = {
+      row,
+      column: col,
+      path: newPath,
+      status: 0,
+    };
+
+    newLocation.status = this.__locationStatus(newLocation, matrix);
+
+    // If this new location is valid, mark it as 'Visited'
+    if (newLocation.status === 0) {
+      matrix[newLocation.row][newLocation.column] = 3;
+    }
+
+    return newLocation;
+  }
+
+  private __locationStatus(location: ILocation, matrix: number[][]): 0 | 1 | 2 | 3 | 4 | 5 {
+    if (location.row < 0 || location.row >= matrix.length) {
+      return 4;
+    }
+
+    if (location.column < 0 || location.column >= matrix[0].length) {
+      return 4;
+    }
+
+    if (matrix[location.row][location.column] === 2) {
+      return 2;
+    }
+
+    if (matrix[location.row][location.column] === 1) {
+      return 1;
+    }
+
+    if (matrix[location.row][location.column] === 5) {
+      return 5;
+    }
+
+    return 0;
   }
 }

@@ -92,10 +92,18 @@ function getAndAssignGameOrders(gameList: IGame[]) {
     })
       .then((response) => response.json())
       .then((orderData: any) => {
-        game.orders = orderData.map(
-          (order: any) =>
-            new Order(order.id, order.spielId, order.zeitpunkt, new Point(order.positionX, order.positionY), order.anzahl, order.typ),
-        );
+        for (let i = 0; i < orderData.length; i++) {
+          game.orders.push(
+            new Order(
+              orderData[i].id,
+              orderData[i].spielId,
+              orderData[i].zeitpunkt,
+              new Point(orderData[i].positionX, orderData[i].positionY),
+              orderData[i].anzahl,
+              orderData[i].typ,
+            ),
+          );
+        }
       });
   });
 }
