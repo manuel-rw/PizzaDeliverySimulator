@@ -9,9 +9,9 @@ export function DeliveryPoint(game: IGame) {
     const canvas = deliveryPointRef.current;
     defaultCanvasProperties(canvas, game.field.width, game.field.height, Layers.DELIVERY_POINT);
     const deliveryPointCtx = canvas.getContext('2d');
-    game.orders.forEach((order) => {
-      drawDeliveryPoint(deliveryPointCtx, order.position);
-    });
+    for (let i = 0; i < game.orders.length; i++) {
+      drawDeliveryPoint(deliveryPointCtx, game.orders[i].position);
+    }
   }, []);
 
   return deliveryPointRef;

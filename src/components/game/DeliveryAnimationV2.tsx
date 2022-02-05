@@ -4,9 +4,8 @@ import { defaultCanvasProperties, Layers } from './Layers';
 
 export function DeliveryAnimationV2(game: IGame) {
   const deliveryAnimationRef = React.useRef(null);
-  const matrix = game.getMatrix();
   const startingPosition = [game.getStoreRowPosition(), game.getStoreColumnPosition()];
-  const sortedPaths = game.getSortedListOfPathsByShorterFirst(matrix);
+  const sortedPaths = game.getSortedListOfPathsByShorterFirst();
 
   const animateDelivery = React.useCallback(() => {
     const canvas = deliveryAnimationRef.current;

@@ -11,8 +11,11 @@ export default function Simulate() {
   const game = new Game(location.id, location.field, location.store, location.maxPizza, location.maxScooter, location.orders);
   const navigate = useNavigate();
   const gameFieldReference = GameField(game.field.width, game.field.height);
+
+  const matrix = game.getMatrix();
+
   const gameFieldMeshRef = GameFieldMesh(game);
-  const gameFieldMeshLabelsRef = GameFieldMeshLabels(game);
+  const gameFieldMeshLabelsRef = GameFieldMeshLabels(game, matrix);
   const storePointRef = StorePoint(game);
   const deliveryPointRef = DeliveryPoint(game);
   const { deliveryAnimationRef, animateDelivery } = DeliveryAnimationV2(game);

@@ -35,9 +35,9 @@ export interface IGame {
   getStoreRowPosition?(): number;
   getStoreColumnPosition?(): number;
   getOrdersSortedByDeliveryTime?(): IOrder[];
-  findShortestPath?(start: number[], end: number[], matrix: number[][]): IPathLocation;
+  // findShortestPath?(start: number[], end: number[], matrix: number[][]): IPathLocation;
   // calculateShortestPath?(): any;
-  getSortedListOfPathsByShorterFirst?(matrix: number[][]): IPathLocation[];
+  getSortedListOfPathsByShorterFirst?(): IPathLocation[];
 }
 
 export class Game implements IGame {
@@ -74,7 +74,11 @@ export class Game implements IGame {
   }
 
   getAmountOfOrders(): number {
-    return this.orders.reduce((acc, cur) => acc + cur.amountOfOrders, 0);
+    let amountOfOrders = 0;
+    for (let i = 0; i < this.orders.length; i++) {
+      amountOfOrders += this.orders[i].amountOfOrders;
+    }
+    return amountOfOrders;
   }
 
   calculateTimeToDelivery(order: IOrder): number {
@@ -86,12 +90,12 @@ export class Game implements IGame {
 
     matrix[this.getStoreRowPosition()][this.getStoreColumnPosition()] = 1;
 
-    this.orders.forEach((order) => {
-      const orderRowPosition = this.__getOrderRowPosition(order.position.y);
-      const orderColumnPosition = this.__getOrderColumnPosition(order.position.x);
+    for (let i = 0; i < this.orders.length; i++) {
+      const orderRowPosition = this.__getOrderRowPosition(this.orders[i].position.y);
+      const orderColumnPosition = this.__getOrderColumnPosition(this.orders[i].position.x);
 
       matrix[orderRowPosition][orderColumnPosition] = 2;
-    });
+    }
 
     return matrix;
   }
@@ -103,13 +107,13 @@ export class Game implements IGame {
     // Each column has the value of x coordinate as an array [x1, x2] e.g start and end of the column
     const columns = this.__getColumns();
 
-    columns.forEach((column, index) => {
-      // Check the key of an object in the column
-      // If it equals 1 (store), we return the column number
+    for (let i = 0; i < columns.length; i++) {
+      const column = columns[i];
+
       if (1 in column) {
-        storePosition = index;
+        storePosition = i;
       }
-    });
+    }
 
     return storePosition;
   }
@@ -121,31 +125,33 @@ export class Game implements IGame {
     // Each row has the value of y coordinate as an array [y1, y2] e.g start and end of the row
     const rows = this.__getRows();
 
-    rows.forEach((row, index) => {
-      // Check the key of an object in the row
-      // If it equals 1 (store), we return the row number
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+
       if (1 in row) {
-        storePosition = index;
+        storePosition = i;
       }
-    });
+    }
 
     return storePosition;
   }
 
-  getSortedListOfPathsByShorterFirst(matrix: [][]): IPathLocation[] {
+  getSortedListOfPathsByShorterFirst(): IPathLocation[] {
     const listOfAllPaths: IPathLocation[] = [];
+    const matrix = this.getMatrix();
+    const start = [this.getStoreRowPosition(), this.getStoreColumnPosition()];
 
-    this.orders.forEach((order) => {
+    for (let i = 0; i < this.orders.length; i++) {
+      const order = this.orders[i];
       const orderRowPosition = this.__getOrderRowPosition(order.position.y);
       const orderColumnPosition = this.__getOrderColumnPosition(order.position.x);
 
-      const start = [this.getStoreRowPosition(), this.getStoreColumnPosition()];
       const end = [orderRowPosition, orderColumnPosition];
 
       const path = this.findShortestPath(start, end, matrix);
 
       listOfAllPaths.push(path);
-    });
+    }
 
     return listOfAllPaths.sort((a, b) => {
       if (a.path.length < b.path.length) {
@@ -220,8 +226,10 @@ export class Game implements IGame {
   calculateShortestPath() {
     // NOTE: This is dummy function to check some theory
     const calculation: { orderPosition: number[]; deliveryTime: number; stepsNeeded: number; path: IPath[]; theoryCalc: number }[] = [];
-    this.orders.forEach((order) => {
-      const start = [this.getStoreRowPosition(), this.getStoreColumnPosition()];
+    const start = [this.getStoreRowPosition(), this.getStoreColumnPosition()];
+
+    for (let i = 0; i < this.orders.length; i++) {
+      const order = this.orders[i];
       const row = this.__getOrderRowPosition(order.position.y);
       const column = this.__getOrderColumnPosition(order.position.x);
       const path = this.findShortestPath(start, [row, column], this.getMatrix());
@@ -232,7 +240,7 @@ export class Game implements IGame {
         path: path.path,
         theoryCalc: order.deliveryTime / path.path.length,
       });
-    });
+    }
 
     console.log(calculation);
   }
@@ -242,13 +250,16 @@ export class Game implements IGame {
 
     const rows = this.__getRows();
 
-    rows.forEach((row, index) => {
-      Object.values(row).forEach((value) => {
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+
+      for (let j = 0; j < Object.values(row).length; j++) {
+        const value = Object.values(row)[j];
         if (orderY >= value[0] && orderY <= value[1]) {
-          orderPosition = index;
+          orderPosition = i;
         }
-      });
-    });
+      }
+    }
 
     return orderPosition;
   }
@@ -258,15 +269,16 @@ export class Game implements IGame {
 
     const columns = this.__getColumns();
 
-    columns.forEach((column, index) => {
-      // for each key in the column
-      Object.values(column).forEach((value) => {
-        // if the value of the key is less or more than the order x coordinate
+    for (let i = 0; i < columns.length; i++) {
+      const column = columns[i];
+
+      for (let j = 0; j < Object.values(column).length; j++) {
+        const value = Object.values(column)[j];
         if (value[0] <= orderX && value[1] >= orderX) {
-          orderPosition = index;
+          orderPosition = i;
         }
-      });
-    });
+      }
+    }
 
     return orderPosition;
   }
