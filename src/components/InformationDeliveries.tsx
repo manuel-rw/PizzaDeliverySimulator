@@ -21,12 +21,12 @@ export default function InformationDeliveries(g: IGame) {
           </small>{' '}
           <br />
           <small>
-            Desired delivery time: <strong>{order.deliveryTime}</strong>
+            Desired delivery time: <strong>{order.deliveryTime}min</strong>
           </small>{' '}
-          <br />
+          {/* <br />
           <small>
             Expected delivery time: <strong>{game.calculateTimeToDelivery(order)}min</strong>
-          </small>
+          </small> */}
         </div>
       ))}
     </>

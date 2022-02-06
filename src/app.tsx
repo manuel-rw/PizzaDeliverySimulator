@@ -6,16 +6,27 @@ import GameListLoadingSkeleton from './components/GameListLoadingSkeleton';
 import { Game, IGame, Order, Field, Point } from './models';
 import Simulate from './simulate';
 
-export default function App() {
-  const [isLoading, setIsLoading] = React.useState(true);
+type AppProps = any;
+
+interface IAppState {
+  games: IGame[];
+  loading: boolean;
+}
+
+class App extends React.Component<AppProps, IAppState> {
   // get current BrowserWindow
-  const win = window as any;
-  // resize the window to the size of the game field
-  win.resizeTo(960, 830);
+  win = window as any;
 
-  const [games, setGames] = React.useState<IGame[]>([]);
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      games: [],
+      loading: true,
+    };
 
-  React.useEffect(() => {
+    // resize the window to the size of the game field
+    this.win.resizeTo(960, 830);
+
     fetch('https://lesta.iet-gibb.ch/pizza/api/Spiel', {
       method: 'GET',
     })
@@ -35,23 +46,28 @@ export default function App() {
             ),
           );
         }
-        setGames(g);
+
+        this.setState({
+          games: g,
+        });
 
         getAndAssignGameOrders(g);
       })
       .finally(() => {
         setTimeout(() => {
-          setIsLoading(false);
+          this.setState({
+            loading: false,
+          });
         }, 1000);
       });
-  }, []);
+  }
 
-  return (
-    <>
+  render() {
+    return (
       <div className="games-list-wrapper">
-        {isLoading && <GameListLoadingSkeleton />}
-        {!isLoading &&
-          games.map((game) => (
+        {this.state.loading && <GameListLoadingSkeleton />}
+        {!this.state.loading &&
+          this.state.games.map((game: IGame) => (
             <Card key={game.id} elevation={3}>
               <CardContent>
                 <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
@@ -59,7 +75,7 @@ export default function App() {
                 </Typography>
                 {game.orders.length > 0 && (
                   <Typography variant="h5" component="div">
-                    Amount of Scooters: {game.getAmountOfScooters()}
+                    Pizzas ordered: {game.getAmountOfOrders()}
                   </Typography>
                 )}
                 <Typography sx={{ mb: 1.5 }} color="text.secondary">
@@ -81,8 +97,8 @@ export default function App() {
             </Card>
           ))}
       </div>
-    </>
-  );
+    );
+  }
 }
 
 function getAndAssignGameOrders(gameList: IGame[]) {
@@ -92,25 +108,29 @@ function getAndAssignGameOrders(gameList: IGame[]) {
     })
       .then((response) => response.json())
       .then((orderData: any) => {
-        game.orders = orderData.map(
-          (order: any) =>
-            new Order(order.id, order.spielId, order.zeitpunkt, new Point(order.positionX, order.positionY), order.anzahl, order.typ),
-        );
+        for (let i = 0; i < orderData.length; i++) {
+          game.orders.push(
+            new Order(
+              orderData[i].id,
+              orderData[i].spielId,
+              orderData[i].zeitpunkt,
+              new Point(orderData[i].positionX, orderData[i].positionY),
+              orderData[i].anzahl,
+              orderData[i].typ,
+            ),
+          );
+        }
       });
   });
 }
 
-function render() {
-  ReactDOM.render(
-    <HashRouter basename="/">
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/main_window" element={<App />} />
-        <Route path="/simulate" element={<Simulate />} />
-      </Routes>
-    </HashRouter>,
-    document.getElementById('root'),
-  );
-}
-
-render();
+ReactDOM.render(
+  <HashRouter basename="/">
+    <Routes>
+      <Route path="/" element={<App />} />
+      <Route path="/main_window" element={<App />} />
+      <Route path="/simulate" element={<Simulate />} />
+    </Routes>
+  </HashRouter>,
+  document.getElementById('root'),
+);

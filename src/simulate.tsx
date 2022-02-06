@@ -1,21 +1,24 @@
 import * as React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
 import { Game } from './models';
 import InformationPizzeria from './components/InformationPizzeria';
 import InformationDeliveries from './components/InformationDeliveries';
-import { GameField, GameFieldMesh, StorePoint, DeliveryPoint, DeliveryAnimation, GameFieldMeshLabels } from './components/game';
+import { GameField, GameFieldMesh, StorePoint, DeliveryPoint, DeliveryAnimationV2, GameFieldMeshLabels } from './components/game';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Simulate() {
   const location: any = useLocation().state;
   const game = new Game(location.id, location.field, location.store, location.maxPizza, location.maxScooter, location.orders);
   const navigate = useNavigate();
   const gameFieldReference = GameField(game.field.width, game.field.height);
+
+  const matrix = game.getMatrix();
+
   const gameFieldMeshRef = GameFieldMesh(game);
-  const gameFieldMeshLabelsRef = GameFieldMeshLabels(game);
+  const gameFieldMeshLabelsRef = GameFieldMeshLabels(game, matrix);
   const storePointRef = StorePoint(game);
   const deliveryPointRef = DeliveryPoint(game);
-  const { deliveryAnimationRef, animateDelivery } = DeliveryAnimation(game);
+  const { deliveryAnimationRef, animateDelivery } = DeliveryAnimationV2(game);
 
   // get current BrowserWindow
   const win = window as any;

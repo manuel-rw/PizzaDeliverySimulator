@@ -4,26 +4,25 @@ import { IGame } from '../../models';
 import { defaultCanvasProperties, Layers } from './Layers';
 
 // TODO complete this function later
-export function GameFieldMeshLabels(game: IGame) {
+export function GameFieldMeshLabels(game: IGame, matrix: number[][]) {
   const gameFieldMeshLabelsRef = React.useRef(null);
 
   React.useEffect(() => {
     const canvas = gameFieldMeshLabelsRef.current;
     defaultCanvasProperties(canvas, game.field.width, game.field.height, Layers.MESH_LABELS);
     const gameFieldMeshLabelsCtx = canvas.getContext('2d');
-    drawMeshLabels(gameFieldMeshLabelsCtx, game);
+    drawMeshLabels(gameFieldMeshLabelsCtx, game, matrix);
   }, []);
 
   return gameFieldMeshLabelsRef;
 }
 
-function drawMeshLabels(ctx: CanvasRenderingContext2D, game: IGame) {
+function drawMeshLabels(ctx: CanvasRenderingContext2D, game: IGame, matrix: number[][]) {
   ctx.beginPath();
 
   ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
   ctx.font = '44px Arial';
 
-  const matrix = game.getMatrix();
   console.log('Matrix: ', matrix);
 
   const xAxisOffset = measureAxisOffset(game.store.x);
