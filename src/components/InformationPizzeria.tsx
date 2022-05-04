@@ -1,9 +1,12 @@
 import React from 'react';
 import { Game, IGame } from '../models';
 
-export default function InformationPizzeria(g: IGame) {
-  const game = new Game(g.id, g.field, g.store, g.maxPizza, g.maxScooter, g.orders);
-
+//export default function InformationPizzeria(props : { game: IGame }) {
+export default function InformationPizzeria({game} : { game: IGame }) {
+  //const game = props.game;
+  
+  //const { game } = props;
+  
   let canceledOrders = 0;
   const sortedOrders = game.getOrdersSortedByDeliveryTime();
   sortedOrders.forEach((order) => {
